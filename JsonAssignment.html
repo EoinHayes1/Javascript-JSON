@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+       <title>
+			CHI 2020
+		</title>
+      <link rel="stylesheet" type="text/css" href="style.css">
+       <meta charset="UTF-8">
+   </head>
+   <body>
+      <div id="main">
+         <div id="header">
+            <header>
+               <h1>Chi 2020</h1>
+               <p>Please select a date and Time</p>
+            </header>
+         </div>
+         <div id= "datetime">
+            Day: 
+            <select id="mySelect">
+               <option value="101">Select a day
+            </select>
+            Time: 
+            <select id="mySelect2">
+               <option value="99">All times 
+            </select>
+            <button type="button" id="myButt" onclick = "genTable(secondLevel)">Show details</button>
+         </div>
+         <br>
+         <div id= "filter">
+            <input type="radio" id="radio" name="filter" value="all" onclick = "allPapers(secondLevel)">
+            <label for="radio">All Sessions</label>   
+            <input type="radio" id="radio2" name="filter" value="paper" onclick = "paperOnly(secondLevel)">
+            <label for="radio2">Only Display Paper Sessions</label>   
+            <input type="radio" id="radio3" name="filter" value="noPaper" onclick = "filterOutPaper(secondLevel)">
+            <label for="radio">Exclude Papers</label>
+         </div>
+         <div id= "content">
+            <p id="demo"></p>
+         </div>
+         <div id= "displayTable">
+            <p id="demo3"></p>
+         </div>
+         <script>
+            var times;
+            var y;
+            var daySlot;
+            var j;
+            var getTitle;
+            var getRoom ;
+            var getType;
+            var submission;
+            var subTitle;
+            var doi;
+            var tableOut;
+            var slotSelect;
+            var daySelection; 
+            var timeSelection; 
+            var parsedArr;  
+            var messageError = "Error Creating Table";
+            var xmlhttp = new XMLHttpRequest();
+            var url = "scheduling.json";
+            
+            xmlhttp.onreadystatechange = function(){
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) { 
+                    parsedArr = JSON.parse(xmlhttp.responseText);
+                    selectLoadDay(parsedArr)
+                    
+                }
+            };
+                xmlhttp.open("GET", url, true);
+                xmlhttp.send();
+            
+            //fills downdown menu with day/date and time
+            function selectLoadDay(parsedArr){
+                
+                var select = document.getElementById('mySelect');
+                var removeTime = document.getElementById("mySelect2");
+                
+                // reset time dropdown selector error check!
+                if (removeTime.length > 1) {
+                removeTime.remove(removeTime.length-1);
+              }
+                
+                for (var opt=0; opt <parsedArr.length; opt++){  
+                    
+                var option = document.createElement("option");
+                
+                option.text = parsedArr[opt].day + " (" + parsedArr[opt].date + ")";
+                option.value = opt;
+                
+                select.appendChild(option);
+                
+                } //end of loop to get day 
+                
+                // when day is changed update the times 
+                select.onchange = function(){
+                    
+                // reset time dropdown selector error check!
+                if (removeTime.length > 1) {
+                removeTime.remove(removeTime.length-1);
+                }
+                
+                var d = document.getElementById("mySelect").value;
+            
+                for (var ti=0; ti <parsedArr.length; ti++){
+                    
+                    
+                    // matchs the value of the day selector to get the times for that day  
+                    if (d == ti){
+                        
+                        var check = parsedArr[ti].day
+                        
+                        var daySlot = parsedArr[ti].slots
+                            
+                        var j;
+                        
+                        for (j in daySlot) {
+                        
+                        var select2 = document.getElementById('mySelect2');
+                        var option = document.createElement("option");
+                        option.text = daySlot[j].time;
+                        option.value = daySlot[j].time;
+                        select2.appendChild(option);
+                            }
+                     if (d != ti) {
+                        document.getElementById("demo").innerHTML = messageError
+                    }   
+                        
+                        }else continue;
+                    }
+                }
+            };  
+                     
+            var mySelect = document.getElementById('mySelect'); 
+            
+            function firstLevel(parsedArr) {
+                
+                 tableOut = "<table>";
+                        tableOut += "<tr><th>Day</th><th>Time</th><th>Room</th><th>Tpye</th><th>Title</th></tr>";
+            
+                var x = document.getElementById("mySelect").value;
+                
+                for (var i=0; i <parsedArr.length; i++) {
+                    
+                    if (x == i){
+                        
+                        daySelection = parsedArr[i].day;
+                        daySlot = parsedArr[i].slots;
+                                  
+                        document.getElementById("demo").innerHTML = "You selected: " + daySelection;
+                        
+                    }
+                }
+            }
+                
+            function secondLevel(firstLevel){
+                
+                firstLevel(parsedArr);
+            
+             var mySelect2 = document.getElementById('mySelect2');
+            
+                y = document.getElementById("mySelect2").value;
+                
+                for (j in daySlot){
+                
+                    slotSelect = daySlot[j].time;
+                        
+                        if (y == slotSelect){
+                        
+                        times = slotSelect;
+                        { break; }           
+                            }
+                        }   
+                    }
+                
+            function filterOutPaper(secondLevel){
+                secondLevel(firstLevel);
+                // filter out paper section 
+            
+            var filterId = document.getElementById('radio3');
+            var filterVal = filterId.value;
+                
+                
+            if (y != 0){ // if there is paper, take it out  
+                        
+                        times = slotSelect;
+                        var final = daySlot[j].sessions;
+                            
+                        for (var z=0; z <final.length; z++){
+                            //paper filter
+                        if (final[z].type == "paper")
+                            {}
+                        else {
+                        {
+                            getTitle = final[z].title;
+                            getRoom = final[z].room;
+                            getType = final[z].type;
+                            
+                            // table taking information
+                            tableOut += "<tr><td>" +
+                            daySelection +
+                            "<td>" +
+                            times +
+                            "</td><td>" +
+                            getRoom +
+                            "</td><td>" +
+                            getType +
+                            "</td><td>" +
+                            getTitle +
+                            "<details><summary>More info</summary>" + "<br>";
+                            
+                            //loop to get all links 
+                            submission = final[z].submissions;
+                            if (submission == ""){
+                                subTitle = "No paper found"
+                            }
+                            for (var a=0; a <submission.length; a++){
+                                subTitle = submission[a].title;
+                                doi = submission[a].doiUrl
+                                
+                                //puts all links into the more information section 
+                                tableOut +=
+                                subTitle + ": <br>" +
+                                "<a href=" + doi + " target='_blank'>" + doi + "</a>" + "<br><br>";
+                            } 
+                            tableOut +=
+                                "</details>" +
+                                "</td></tr>";
+                        }
+                    }
+                }
+                        
+            // 99 is value of all times selector to 
+            if (y == 99) {
+                            
+                for (j in daySlot){
+                
+                    slotSelect = daySlot[j].time;
+                                    
+                        times = slotSelect;
+                       
+                        var final = daySlot[j].sessions;
+                            
+                        for (var z=0; z <final.length; z++){
+                            //paper filter
+                            //if final[z].type is paper, pass and dont put values in table
+                        if (final[z].type == "paper")
+                            {}
+                            //is not paper, then put values in table
+                        else{
+                            getTitle = final[z].title;
+                            getRoom = final[z].room;
+                            getType = final[z].type;
+                            
+                            // table taking information
+                            tableOut += "<tr><td>" +
+                            daySelection +
+                            "<td>" +
+                            times +
+                            "</td><td>" +
+                            getRoom +
+                            "</td><td>" +
+                            getType +
+                            "</td><td>" +
+                            getTitle +
+                            "<details><summary>More info</summary>" + "<br>";
+                            
+                            //show no papers found final[z].submissions in blank 
+                            submission = final[z].submissions;
+                            if (submission == ""){
+                                subTitle = "No paper found"
+                            }
+                            //loop to get all links 
+                            for (var a=0; a <submission.length; a++){
+                                subTitle = submission[a].title;
+                                doi = submission[a].doiUrl
+                                
+                                //puts all links into the more information section 
+                                tableOut +=
+                                subTitle + ": <br>" +
+                                "<a href=" + doi + " target='_blank'>" + doi + "</a>" + "<br><br>";
+                            } 
+                            // closes the more info section 
+                            tableOut +=
+                                "</details>" +
+                                "</td></tr>";
+                        }
+                    } 
+                }                
+            }
+        }
+                
+                //closes table 
+                tableOut += "</table>"; 
+                
+                document.getElementById("demo3").innerHTML = tableOut; 
+            }
+            
+            function allPapers(secondLevel){
+                secondLevel(firstLevel);
+                // error check
+            if (y != 0){
+                          
+                        times = slotSelect;
+                        var final = daySlot[j].sessions;
+                            
+                        for (var z=0; z <final.length; z++){
+                            
+                            getTitle = final[z].title;
+                            getRoom = final[z].room;
+                            getType = final[z].type;
+                            
+                            // table taking information
+                            tableOut += "<tr><td>" +
+                            daySelection +
+                            "<td>" +
+                            times +
+                            "</td><td>" +
+                            getRoom +
+                            "</td><td>" +
+                            getType +
+                            "</td><td>" +
+                            getTitle +
+                            "<details><summary>More info</summary>" + "<br>";
+                            
+                            //loop to get all links 
+                            submission = final[z].submissions;
+                            if (submission == ""){
+                                subTitle = "No paper found"
+                            }
+                            for (var a=0; a <submission.length; a++){
+                                subTitle = submission[a].title;
+                                doi = submission[a].doiUrl
+                                
+                                //puts all links into the more information section 
+                                tableOut +=
+                                subTitle + ": <br>" +
+                                "<a href=" + doi + " target='_blank'>"  + doi + "</a>" + "<br><br>";
+                            } 
+                            tableOut +=
+                                "</details>" +
+                                "</td></tr>";
+                        }
+            }           
+            // 99 is value of all times selector 
+            if (y == 99) {
+                            
+                for (j in daySlot){
+                
+                    slotSelect = daySlot[j].time;
+                                    
+                        times = slotSelect;
+                              
+                        var final = daySlot[j].sessions;
+                            
+                        for (var z=0; z <final.length; z++){
+                            
+                            getTitle = final[z].title;
+                            getRoom = final[z].room;
+                            getType = final[z].type;
+                            
+                            // table taking information
+                            tableOut += "<tr><td>" +
+                            daySelection +
+                            "<td>" +
+                            times +
+                            "</td><td>" +
+                            getRoom +
+                            "</td><td>" +
+                            getType +
+                            "</td><td>" +
+                            getTitle +
+                            "<details><summary>More info</summary>" + "<br>";
+                            
+                            //loop to get all links 
+                            submission = final[z].submissions;
+                            if (submission == ""){
+                                subTitle = "No paper found"
+                            }
+                            for (var a=0; a <submission.length; a++){
+                                subTitle = submission[a].title;
+                                doi = submission[a].doiUrl
+                                
+                                //puts all links into the more information section 
+                                tableOut +=
+                                subTitle + ": <br>" +
+                                "<a href=" + doi + " target='_blank'>"  + doi + "</a>" + "<br><br>";
+                            } 
+                            tableOut +=
+                                "</details>" +
+                                "</td></tr>";
+                        } 
+                    }
+                }
+                //closes table 
+                tableOut += "</table>"; 
+                
+                document.getElementById("demo3").innerHTML = tableOut; 
+            }
+            
+            function paperOnly(secondLevel){
+                secondLevel(firstLevel);
+                // filter out paper section 
+            
+            var filterId = document.getElementById('radio2');
+            var filterVal = filterId.value;
+                
+            if (y != 0){ // if there is paper, take it out 
+                        
+                        times = slotSelect;
+                        var final = daySlot[j].sessions;
+                            
+                        for (var z=0; z <final.length; z++){
+                            //paper filter
+                        if (final[z].type == "paper")
+                            {
+                            
+                            
+                            getTitle = final[z].title;
+                            getRoom = final[z].room;
+                            getType = final[z].type;
+                            
+                            // table taking information
+                            tableOut += "<tr><td>" +
+                            daySelection +
+                            "<td>" +
+                            times +
+                            "</td><td>" +
+                            getRoom +
+                            "</td><td>" +
+                            getType +
+                            "</td><td>" +
+                            getTitle +
+                            "<details><summary>More info</summary>" + "<br>";
+                            
+                            //loop to get all links 
+                            submission = final[z].submissions;
+                                if (submission == ""){
+                                subTitle = "No paper found"
+                            }
+                            for (var a=0; a <submission.length; a++){
+                                subTitle = submission[a].title;
+                                doi = submission[a].doiUrl
+                                
+                                //puts all links into the more information section 
+                                tableOut +=
+                                subTitle + ": <br>" +
+                                "<a href=" + doi + " target='_blank'>" + doi + "</a>" + "<br><br>";
+                            } 
+                            tableOut +=
+                                "</details>" +
+                                "</td></tr>";
+                        }
+                        //pass if "paper is not found"
+                        else {
+                        }
+            }
+                        
+            // select all times (99 is value for all times to display)
+            if (y == 99) {
+                            
+                for (j in daySlot){
+                
+                    slotSelect = daySlot[j].time;
+                                    
+                        times = slotSelect;
+                       
+                        var final = daySlot[j].sessions;
+                            
+                        for (var z=0; z <final.length; z++){
+                            //paper filter
+                        if (final[z].type == "paper")
+                            {getTitle = final[z].title;
+                            getRoom = final[z].room;
+                            getType = final[z].type;
+                            
+                            // table taking information
+                            tableOut += "<tr><td>" +
+                            daySelection +
+                            "<td>" +
+                            times +
+                            "</td><td>" +
+                            getRoom +
+                            "</td><td>" +
+                            getType +
+                            "</td><td>" +
+                            getTitle +
+                            "<details><summary>More info</summary>" + "<br>";
+                            
+                            //loop to get all links 
+                            submission = final[z].submissions;
+                             if (submission == ""){
+                                subTitle = "No paper found"
+                            }
+                            for (var a=0; a <submission.length; a++){
+                                subTitle = submission[a].title;
+                                doi = submission[a].doiUrl
+                                
+                                //puts all links into the more information section 
+                                tableOut +=
+                                subTitle + ": <br>" +
+                                "<a href=" + doi + " target='_blank'>" + doi + "</a>" + "<br><br>";
+                            } 
+                            tableOut +=
+                                "</details>" +
+                                "</td></tr>";
+                        }
+                        else{
+                            }
+                        } 
+                    }
+                }
+            }
+                
+                //closes table 
+                tableOut += "</table>"; 
+                
+                document.getElementById("demo3").innerHTML = tableOut; 
+        }  
+                      
+            function genTable(secondLevel){
+                var dayError = document.getElementById("mySelect").value;
+                if (dayError == 101){
+                    document.getElementById("demo").innerHTML = messageError
+                }
+                else{
+                allPapers(secondLevel)
+                }
+            }
+         </script>
+      </div>
+   </body>
+</html>
